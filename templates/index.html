@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>RCM Code Assist Prototype</title>
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='style.css') }}"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>RCM Code Assist Prototype</h1>
+                <p>
+                    Select a pre-loaded encounter or paste your own JSON to see
+                    the automated coding and charge capture results.
+                </p>
+            </header>
+            <main class="content">
+                <div class="input-pane">
+                    <h2>Patient Encounters</h2>
+                    <div class="encounters-table-container">
+                        <table id="encounters-table" class="encounters-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Patient</th>
+                                    <th>Date</th>
+                                    <th>Reason</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <h3>Selected Encounter JSON</h3>
+                    <textarea
+                        id="json-input"
+                        rows="15"
+                        placeholder="Select an encounter from the table above to see its JSON data..."
+                    ></textarea>
+                    <button id="process-btn">Process Selected Encounter</button>
+                </div>
+                <div class="output-pane" id="output-pane">
+                    <div id="output-placeholder">
+                        <h2>Results</h2>
+                        <p>Results will be displayed here after processing.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const encountersTable = document.getElementById('encounters-table');
+                const jsonInput = document.getElementById('json-input');
+                const processBtn = document.getElementById('process-btn');
+                const outputPane = document.getElementById('output-pane');
+                let csvEncountersData = [];
+                let fullEncountersData = {};
+                let selectedEncounterId = null;
+
+                // Load CSV encounter data and populate table
+                Promise.all([
+                    fetch('/api/encounters_csv').then(res => res.json()),
+                    fetch('/api/encounters_full').then(res => res.json())
+                ]).then(([csvData, fullData]) => {
+                    csvEncountersData = csvData;
+                    fullEncountersData = fullData;
+                    populateEncountersTable(csvData);
+                }).catch(error => {
+                    console.error('Error loading encounters:', error);
+                    renderError('Failed to load encounter data.');
+                });
+
+                function populateEncountersTable(data) {
+                    const tbody = encountersTable.querySelector('tbody');
+                    tbody.innerHTML = '';
+                    
+                    data.forEach(encounter => {
+                        const row = tbody.insertRow();
+                        row.classList.add('encounter-row');
+                        row.setAttribute('data-encounter-id', encounter.encounter_id);
+                        
+                        row.innerHTML = `
+                            <td>${encounter.encounter_id}</td>
+                            <td>${encounter.patient_name}</td>
+                            <td>${encounter.visit_date}</td>
+                            <td>${encounter.reason_for_visit}</td>
+                            <td>${encounter.visit_type}</td>
+                        `;
+                        
+                        // Add click handler for row selection
+                        row.addEventListener('click', function() {
+                            // Remove previous selection
+                            document.querySelectorAll('.encounter-row.selected').forEach(r => {
+                                r.classList.remove('selected');
+                            });
+                            
+                            // Add selection to clicked row
+                            row.classList.add('selected');
+                            selectedEncounterId = encounter.encounter_id;
+                            
+                            // Populate JSON textarea
+                            if (fullEncountersData[encounter.encounter_id]) {
+                                jsonInput.value = JSON.stringify(fullEncountersData[encounter.encounter_id], null, 2);
+                            }
+                        });
+                    });
+                }
+
+                // Process button click handler
+                processBtn.addEventListener('click', function() {
+                    let encounterJson;
+                    try {
+                        encounterJson = JSON.parse(jsonInput.value);
+                    } catch (e) {
+                        alert("Invalid JSON format in the input area.");
+                        return;
+                    }
+
+                    outputPane.innerHTML = '<div class="loading">Processing...</div>';
+
+                    fetch('/api/process', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(encounterJson)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.error) {
+                            renderError(data.error);
+                        } else {
+                            renderResults(data);
+                        }
+                    })
+                    .catch(error => {
+                        renderError('A network error occurred. Please try again.');
+                        console.error("Error:", error);
+                    });
+                });
+
+                function renderResults(data) {
+                    outputPane.innerHTML = `
+                        <h2>Results for ${data.encounter_id}</h2>
+                        ${renderFacts(data.extracted)}
+                        ${renderWarnings(data.policy_warnings)}
+                        ${renderCharges(data.charges)}
+                    `;
+                }
+
+                function renderFacts(facts) {
+                    let html = '<h3>Extracted Clinical Facts</h3>';
+                    if (!facts || Object.keys(facts).length === 0) return html + '<p>None found.</p>';
+
+                    for (const [category, items] of Object.entries(facts)) {
+                        if(items.length > 0) {
+                            html += `<h4>${category.charAt(0).toUpperCase() + category.slice(1)}</h4>`;
+                            html += '<ul>';
+                            items.forEach(item => {
+                                html += `<li><strong>${item.label || item.name}</strong> (Evidence: <em>"${item.evidence.text}"</em> [${item.evidence.sentence_id}])</li>`;
+                            });
+                            html += '</ul>';
+                        }
+                    }
+                    return html;
+                }
+
+                function renderWarnings(warnings) {
+                     if (!warnings || Object.keys(warnings).length === 0) return '';
+                     let html = '<div class="warnings"><h3>Policy Warnings</h3><ul>';
+                     for (const [code, messages] of Object.entries(warnings)) {
+                         messages.forEach(msg => {
+                             html += `<li><strong>${code}:</strong> ${msg}</li>`;
+                         });
+                     }
+                     html += '</ul></div>';
+                     return html;
+                }
+
+                function renderCharges(charges) {
+                    let html = '<h3>Generated Charges</h3>';
+                    if (!charges || charges.length === 0) return html + '<p>No charges were generated.</p>';
+
+                    html += '<table><thead><tr><th>Description</th><th>Code</th><th>Units</th><th>Unit Price</th><th>Total</th></tr></thead><tbody>';
+                    let grandTotal = 0;
+                    charges.forEach(charge => {
+                        grandTotal += charge.total;
+                        html += `
+                            <tr>
+                                <td>${charge.description}</td>
+                                <td>${charge.code}</td>
+                                <td>${charge.units}</td>
+                                <td>${charge.unit_price.toFixed(2)}</td>
+                                <td>${charge.total.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    });
+                    html += '</tbody></table>';
+                    html += `<div class="total">Grand Total: <strong>${grandTotal.toFixed(2)}</strong></div>`;
+                    return html;
+                }
+
+                function renderError(errorMsg) {
+                    outputPane.innerHTML = `<div class="error"><h3>Error</h3><p>${errorMsg}</p></div>`;
+                }
+            });
+        </script>
+    </body>
+</html>

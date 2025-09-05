@@ -1,0 +1,11 @@
+Encounter,Patient,Visit type,Diagnoses,Services,Tests,Imaging,Charge total (mock currency),Warnings
+ENC-001,Amal Rahman,New patient,Acute pharyngitis,Outpatient visit (New patient ; Level 3),Rapid streptococcal antigen test,—,115,—
+ENC-002,Muhammad Al-Harthy,New patient,Acute right knee sprain,Outpatient visit (New patient ; Level 3),—,Knee X-ray; right; two views,150,—
+ENC-003,Sara Al Naimi,Established patient,Mixed hyperlipidemia; Type 2 diabetes without complications,Outpatient visit (Established patient ; Level 3),Fasting lipid profile; Glycated hemoglobin; Urine microalbumin,—,160,—
+ENC-004,Faisal Khan,Established patient,Essential hypertension,Outpatient visit (Established patient ; Level 3),Resting electrocardiogram with interpretation,—,115,—
+ENC-005,Leila Haddad,Established patient,Mild asthma exacerbation,Outpatient visit (Established patient ; Level 3),—,—,100,—
+ENC-006,Omar Saleh,New patient,Migraine without warning signs,Outpatient visit (New patient ; Level 4),—,Head MRI without contrast,540,—
+ENC-007,Hanan Yusuf,New patient,Uncomplicated urinary tract infection,Outpatient visit (New patient ; Level 2),Urinalysis with microscopy; Urine culture,—,115,—
+ENC-008,Noura Al-Maktoum,New patient,Allergic contact dermatitis,Outpatient visit (New patient ; Level 2),—,—,60,—
+ENC-009,Karim Haddad,New patient,Acute low back pain with probable radicular symptoms,Outpatient visit (New patient ; Level 4),—,Lumbar spine X-ray; two or three views,210,—
+ENC-010,Aisha Al-Saud,New patient,Early intrauterine pregnancy,Outpatient visit (New patient ; Level 4),Prenatal laboratory panel,Early pregnancy ultrasound; transabdominal,345,—

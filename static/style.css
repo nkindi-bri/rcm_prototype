@@ -1,0 +1,259 @@
+/* static/style.css */
+:root {
+    --bg-color: #f8f9fa;
+    --pane-bg: #ffffff;
+    --border-color: #dee2e6;
+    --text-color: #212529;
+    --primary-color: #007bff;
+    --primary-hover: #0056b3;
+    --danger-color: #dc3545;
+    --warning-bg: #fff3cd;
+    --warning-border: #ffeeba;
+    --warning-text: #856404;
+    --font-family: "Inter", sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 2rem;
+    font-size: 16px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background-color: var(--pane-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+header p {
+    margin: 0;
+    color: #6c757d;
+}
+
+.content {
+    display: flex;
+    flex-direction: row;
+    min-height: 70vh;
+}
+
+.input-pane,
+.output-pane {
+    padding: 2rem;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-pane {
+    border-right: 1px solid var(--border-color);
+}
+
+.input-pane h2,
+.output-pane h2 {
+    margin-top: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+#encounter-select,
+#json-input,
+#process-btn {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+#encounter-select {
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+
+#json-input {
+    flex-grow: 1;
+    font-family: monospace;
+    font-size: 0.9rem;
+    padding: 1rem;
+    resize: vertical;
+}
+
+#process-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#process-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+.output-pane {
+    overflow-y: auto;
+}
+
+#output-placeholder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #6c757d;
+}
+
+.output-pane h3 {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+.output-pane h3:first-child {
+    margin-top: 0;
+}
+
+.output-pane h4 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.output-pane ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.output-pane li {
+    padding: 0.5rem;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.output-pane li strong {
+    font-weight: 500;
+}
+
+.output-pane li em {
+    color: #495057;
+}
+
+.warnings {
+    background-color: var(--warning-bg);
+    border: 1px solid var(--warning-border);
+    color: var(--warning-text);
+    padding: 1rem;
+    border-radius: 6px;
+}
+
+.error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 6px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+thead th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.total {
+    text-align: right;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Encounters table styles */
+.encounters-table-container {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.encounters-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.encounters-table th {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem 0.5rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.encounters-table td {
+    padding: 0.5rem;
+    border-bottom: 1px solid #f1f3f5;
+    font-size: 0.85rem;
+}
+
+.encounter-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.encounter-row:hover {
+    background-color: #f8f9fa;
+}
+
+.encounter-row.selected {
+    background-color: #e3f2fd;
+}
+
+.encounter-row.selected:hover {
+    background-color: #bbdefb;
+}
+
+.input-pane h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
